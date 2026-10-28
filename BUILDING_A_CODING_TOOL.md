@@ -39,6 +39,7 @@ Reusable prompts for all six roles (planner, builder, verifier, failure-recorder
 8. Run a canary: four concurrent agents across the builder lanes plus a verifier task on the local lane, with simultaneous `nvidia-smi` telemetry captured mid-flight. Responses alone are not proof of GPU use.
 9. Only after the canary passes: retire superseded hardware.
 10. Run the error-learning loop continuously (below) and keep both repos updated.
+11. **Repeat the canary as a tool, not a ritual.** The manual four-agent canary was codified as `scripts/pool_canary.py` (argparse `--env-file`, `--agents N`): loads env via the verifier's own parser, discovers lanes from the pool contract, fires N concurrent chat completions round-robin across lanes, and (with `VERIFY_GPU_SSH=1`) captures per-lane `nvidia-smi` telemetry simultaneously. Exit 0 only if every request and every GPU check passes. Deterministic mocked tests pin URL construction, round-robin spread, and failure paths.
 
 ## 4. Verification gates
 
@@ -70,6 +71,7 @@ The tool must treat every failure as a learning event:
 - Wrong-model pulls leave orphaned `-partial` blobs that eat disk (a 40 GB instance hit 79% with a 9.5 GB orphan); inventory blobs by mtime before deleting only true orphans.
 - Deduplication: shared blobs between model variants let a corrected pull resume at ~75%.
 - The console API: `/api/v1/` reads with cookie auth work in-browser; destroy is `DELETE /api/v0/instances/<id>/`. A client-side timeout does NOT mean the call failed — re-read state before retrying a destructive call.
+- **Config files must be parseable by the tools that depend on them.** The repo's `config.env` embedded a markdown usage guide (47 of 106 lines were prose), so the documented `set -a && source config.env` invocation aborted with bash syntax errors before the verifier even started — on the operating Mac, not in the sandbox. Fix both sides: comment out the prose (assignments byte-identical), and never make a tool *depend* on `source`: the verifier now reads its own `config.env` via a strict `KEY=VALUE` parser (`--env-file`, exported vars win via `setdefault`). A tool must read its own config defensively.
 - Session history claims can be wrong; direct inspection always wins.
 - Scope greps on the Mac to small subdirectories or they time out.
 - `resources_unavailable` on a vast.ai start call means queued, not failed.
