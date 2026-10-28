@@ -2,10 +2,10 @@
 
 How a successful AI coding tool should be built — and how it should work.
 
-This is the companion repository to the **vast-coding-vm** project (dual-GPU coding VM: local Quadro P4000 passthrough + rented vast.ai RTX 3090). It captures the verified architecture, the build process, and the hard-won operational lessons (with an error-learning loop) from building and running that system.
+This is the companion repository to the **vast-coding-vm** project (three-lane coding GPU pool: two rented vast.ai RTX 3090 builder workers + local Quadro P4000 verifier, running Huihui-Qwen3-Coder-30B through a bounded autonomous agent loop). It captures the verified architecture, the build process, and the hard-won operational lessons (with an error-learning loop) from building and running that system.
 
 ## Contents
-- [BUILDING_A_CODING_TOOL.md](BUILDING_A_CODING_TOOL.md) — the full methodology: architecture, build sequence, verification gates, and the error-learning loop.
+- [BUILDING_A_CODING_TOOL.md](BUILDING_A_CODING_TOOL.md) — the full methodology: architecture, the bounded agent loop, build sequence, verification gates, and the error-learning loop.
 
 ## Source project
 The main project repo: `jhartzell-code/vast-coding-vm` — a vast.ai GPU lifecycle CLI (`vastvm`) plus coding-VM deployment tooling, reconstructed after a backend migration wiped the original repo mid-rebuild.

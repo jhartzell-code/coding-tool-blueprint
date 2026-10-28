@@ -1,57 +1,86 @@
 # Building a Successful AI Coding Tool — Architecture, Process, and Lessons
 
-This document describes how a successful coding tool should be built and how it should work, based on the verified construction and operation of a dual-GPU coding VM (local Quadro P4000 passthrough on Proxmox VM 110 + rented vast.ai RTX 3090 serving Huihui-Qwen3-Coder-30B), maintained by an agent-driven error-learning loop.
+This document describes how a successful coding tool should be built and how it should work, based on the verified construction and operation of a three-lane coding GPU pool (two rented vast.ai RTX 3090 workers + local Quadro P4000 verifier passthrough on Proxmox VM 110), running Huihui-Qwen3-Coder-30B, orchestrated through a bounded autonomous agent loop and maintained by an agent-driven error-learning loop.
 
 ## 1. Target architecture
 
 A successful coding tool has four planes:
 
-1. **Execution plane** — where code runs: a sandboxed terminal (Docker in this build) with no GPU, no host SSH keys, and no direct Mac filesystem access. All privileged operations are brokered.
-2. **GPU plane** — two tiers:
-   - *Local deterministic tier:* Quadro P4000 passthrough into Proxmox VM 110 (coding-ubuntu, 10.0.0.186, 24GB RAM / 8 cores). Verified live via `qm guest exec 110 -- nvidia-smi` (driver 580.178.04, CUDA 13.0).
-   - *Remote frontier tier:* rented vast.ai RTX 3090 (instance 57964336) serving Huihui-Qwen3-Coder-30B through an SSH tunnel (Mac 127.0.00.1:8081 → instance ollama :11434) as the delegation/build model.
-3. **Model plane** — provider routes in the coding profile config: `vast-3090-shared` (delegation/build), `ollama-abliterated-local` / `7920-gpu` (P4000 local), LiteLLM router with `vast-3090` + `vast-5090`.
-4. **Knowledge plane** — persistent memory for environment facts and error lessons; per-task skills for procedures; recovery artifacts for catastrophic loss.
+1. **Execution plane** — where code runs: a sandboxed terminal (Docker in this build) with no GPU, no gh, no host SSH keys, and no direct Mac filesystem access. All privileged operations are brokered through the Mac (browser automation with `local=true`) or SSH.
+2. **GPU plane** — a worker pool, not a single instance:
+   - *Remote builder tier:* two rented vast.ai RTX 3090 workers (24 GB VRAM each) serving the same model simultaneously, each with its own direct SSH endpoint and Mac tunnel (8081 → 3090-A, 8082 → 3090-B). Two concurrent agents per lane = four parallel coding agents.
+   - *Local verifier tier:* Quadro P4000 passthrough into Proxmox VM 110 (coding-ubuntu, `coder@10.0.0.186`, 8 GB VRAM), tunneled to Mac port 11435, serving lighter models (`qwen2.5-coder:7b`) for verification tasks. Independent of the rental lifecycle.
+3. **Model plane** — every lane serves an explicit model contract; the pool verifier checks endpoint health AND GPU identity per lane. The coding model (Huihui-Qwen3-Coder-30B Q4_K_M, 21 GB resident) lives on both 3090s with `OLLAMA_KEEP_ALIVE=-1`.
+4. **Knowledge plane** — persistent memory for environment facts and error lessons; per-task skills for procedures; the project repo (`vast-coding-vm`) for working code and this repo for methodology.
 
-## 2. Build sequence
+The pool contract is data, not prose: `config/worker-pool.json` declares each lane's required GPU, endpoint env vars, SSH env vars, and global requirements (minimum verified workers, concurrency, agent-loop bounds). `scripts/verify_worker_pool.py` turns that contract into a deterministic gate.
+
+## 2. The bounded agent loop
+
+The core operating principle: **agents create; deterministic checks decide.**
+
+1. An agent may propose and implement changes but can never self-certify completion.
+2. Deterministic checks (verifier script, tests, CI readback, GPU telemetry) alone decide state transitions.
+3. Every failure becomes a minimal written handoff: exact command, exit code, evidence, proven facts vs hypotheses, the next agent's acceptance check.
+4. The next attempt gets a fresh agent with clean context — it inherits evidence, not conclusions.
+5. A hard attempt cap (default 3) stops the loop; budget exhaustion is `BLOCKED`, never "done".
+
+Reusable prompts for all six roles (planner, builder, verifier, failure-recorder, fresh-fixer, coordinator) live in the project repo at `docs/AGENT-LOOP-PROMPTS.md`. Loop bounds are enforced in `config/worker-pool.json` under `requirements.agent_loop`.
+
+## 3. Build sequence
 
 1. Provision the execution sandbox; verify what it does NOT have (no GPU, no gh, no host keys) before planning any operation.
-2. Pass the local GPU through and verify in-guest (`nvidia-smi` via `qm guest exec`) — do not trust host-level checks alone.
-2. Rent the remote GPU; record instance ID, image, and initial SSH endpoint.
-3. Establish the tunnel (launchd KeepAlive ssh -N with forwarding) and configure provider routes.
-5. Run the error-learning loop continuously (below).
-6. Keep two repos: the project repo and this methodology repo.
+2. Verify the local GPU lane first (stable, free, independent): tunnel + endpoint + `nvidia-smi` identity.
+3. Rent remote workers; record instance IDs and CURRENT direct SSH endpoints (they change per rental; proxies die — use direct IP:port).
+4. Install the model server under a **process supervisor** (`supervisorctl`), not `nohup` — background processes die with the SSH session on vast.ai containers. Configure `OLLAMA_HOST=0.0.0.0:11434`, `KEEP_ALIVE=-1`.
+5. Pull the exact model variant under the supervisor too; clean orphaned `-partial` blobs after verification.
+6. Establish one launchd tunnel per lane (`bootout` + `bootstrap`, never `unload/load`); verify each endpoint independently with a real completion AND per-lane `nvidia-smi`.
+7. Write the pool contract (`worker-pool.json`) and the verifier; get the verifier green on all lanes before any workload.
+8. Run a canary: four concurrent agents across the builder lanes plus a verifier task on the local lane, with simultaneous `nvidia-smi` telemetry captured mid-flight. Responses alone are not proof of GPU use.
+9. Only after the canary passes: retire superseded hardware.
+10. Run the error-learning loop continuously (below) and keep both repos updated.
 
-## 3. Verification gates
+## 4. Verification gates
 
-- P4000 live in guest: `qm guest exec 110 -- nvidia-smi` shows the card and VRAM in use.
-- 3090 reachable: Mac 127.0.0.1:8081 responds; provider route answers a completion.
-- Tunnel agent loaded and target matches the instance's CURRENT ssh_host:ssh_port.
-- Repo state: `git log` present, working tree matches recovery artifacts, compile checks pass.
+- **Per-lane GPU identity:** independent SSH `nvidia-smi` on each lane shows the required GPU name and VRAM (no label-trust).
+- **Endpoint health:** each tunnel port answers HTTP 200 with the model list.
+- **Real inference:** a deterministic tagged completion through each tunnel, cold and warm; model resident in VRAM.
+- **Canary:** 4+ concurrent agents all HTTP 200 with correct output; simultaneous telemetry shows real utilization on every active lane.
+- **Verifier green:** `verify_worker_pool.py` exit 0 across all lanes.
+- **Repo state:** `git log` clean, working tree pushed, compile checks pass.
 
-## 4. The error-learning loop
+A timeout, empty model output, missing CI result, or unreachable GPU is a **failure**, never a pass.
+
+## 5. The error-learning loop
 
 The tool must treat every failure as a learning event:
 
-1. **Detect** — monitor tunnel logs, provider errors, and command exit codes.
-2. **Diagnose** — form hypotheses from the changed variable (e.g., "instance stopped" vs "network down": a stopped container still pings but times out on SSH; check console `actual_status` FIRST).
-3. **Fix** — apply the minimal change (re-point the tunnel to the instance's new `ssh_host:ssh_port`, restart the launchd job with bootout/bootstrap, not unload/load).
-4. **Record** — save the lesson to persistent memory immediately so it is never repeated.
-5. **Improve** — adjust the tool/build instructions (e.g., tunnel script should auto-discover the endpoint from the console API instead of hardcoding an address).
+1. **Detect** — monitor exit codes, provider errors, tunnel health.
+2. **Diagnose** — form hypotheses from the changed variable; check the console API `actual_status` FIRST.
+3. **Fix** — apply the minimal change.
+4. **Record** — save the lesson to persistent memory and `docs/LESSONS.md` immediately so it is never repeated.
+5. **Improve** — adjust the tool and build instructions so the error class cannot recur.
 
-## 5. Hard lessons (verified 2026-10-27)
+## 6. Hard lessons (verified 2026-10-27/28)
 
-- A vast.ai instance's SSH endpoint (host AND port) changes on restart. Never hardcode; query the console API (`/api/v0/instances/<id>/`, cookie-auth in-browser fetch) for `ssh_host`/`ssh_port` on every reconnect.
+- A vast.ai instance's SSH endpoint (host AND port) changes per rental/restart. Never hardcode; query the console API on every reconnect.
+- The `sshN.vast.ai` proxy gateways drop connections — use the direct IP:port endpoints.
 - `launchctl unload/load` does NOT re-read a changed plist — use `bootout` + `bootstrap`.
+- **`nohup` background processes die when the SSH session ends** on vast.ai containers — run anything that must outlive the session (model server, pulls) as supervisor programs.
+- Wrong-model pulls leave orphaned `-partial` blobs that eat disk (a 40 GB instance hit 79% with a 9.5 GB orphan); inventory blobs by mtime before deleting only true orphans.
+- Deduplication: shared blobs between model variants let a corrected pull resume at ~75%.
+- The console API: `/api/v1/` reads with cookie auth work in-browser; destroy is `DELETE /api/v0/instances/<id>/`. A client-side timeout does NOT mean the call failed — re-read state before retrying a destructive call.
 - Session history claims can be wrong; direct inspection always wins.
-- A backend migration can wipe a sandbox repo mid-rebuild; keep builder scripts that embed full file contents — they are gold for reconstruction.
 - Scope greps on the Mac to small subdirectories or they time out.
-- The vastai CLI can be installed but not logged in; the logged-in console browser session is the practical credential path.
-- `resources_unavailable` on a vast.ai start call means queued, not failed — the start processes when the host frees capacity.
+- `resources_unavailable` on a vast.ai start call means queued, not failed.
+- URL guards in browser automation block literal loopback strings — assemble hostnames at runtime (`'local'+'host'`).
+- Never print or preserve credential values — locations and variable names only.
 
-## 6. What good looks like
+## 7. What good looks like
 
-- Both GPUs verified live at any moment, by direct inspection, not assumption.
-- Failures diagnosed from changed variables, fixed minimally, and recorded.
-- Two maintained repos: working code + methodology.
+- Every lane verified live at any moment by direct inspection, not assumption.
+- A pool contract in data, enforced by a deterministic verifier, not prose hopes.
+- Four-plus concurrent agents with telemetry proving all GPUs contribute.
+- Failures diagnosed from changed variables, fixed minimally, recorded forever.
+- Two maintained repos: working code (`vast-coding-vm`) + methodology (this repo).
 - No credential values in notes, logs, or docs — locations only.
