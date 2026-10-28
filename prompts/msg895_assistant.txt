@@ -1,0 +1,40 @@
+ROLE: assistant
+CONTENT_LEN: 384
+TOOL_CALLS: 3
+
+===== CONTENT =====
+Those discover files hold only short snippets (the big 21K–28K results rotated away). The proven route: **fresh discover queries with anchor phrases return big snippets that include full tool-call args** (as msg 556's round-3 script did). Firing targeted queries for the four remaining recovery targets — PLAN.md v1 write_file, round-4 patch, round-5 ledger section, Builder-A slices:
+
+===== TOOL_CALL 0 =====
+{
+ "id": "chatcmpl-tool-bc59071baffc2e85",
+ "call_id": "chatcmpl-tool-bc59071baffc2e85",
+ "response_item_id": "fc_chatcmpl-tool-bc59071baffc2e85",
+ "type": "function",
+ "function": {
+  "name": "tool_call",
+  "arguments": "{\"calls\": [{\"name\": \"session_search\", \"arguments\": {\"limit\": 5, \"query\": \"write_file PLAN.md vastvm subcommands search up status ssh provision stop start destroy cost doctor\", \"role_filter\": \"assistant\"}}]}"
+ }
+}
+===== TOOL_CALL 1 =====
+{
+ "id": "call_99a8b6f3bdcc",
+ "call_id": "call_99a8b6f3bdcc",
+ "response_item_id": "fc_99a8b6f3bdcc",
+ "type": "function",
+ "function": {
+  "name": "tool_call",
+  "arguments": "{\"calls\": [{\"name\": \"session_search\", \"arguments\": {\"limit\": 5, \"query\": \"ROUND-4 re-query failure UNKNOWN exit 5 matched instance id reporting L5 exclusive flock label lock ledger round-4 section\", \"role_filter\": \"assistant\"}}]}"
+ }
+}
+===== TOOL_CALL 2 =====
+{
+ "id": "call_f95b4278948e",
+ "call_id": "call_f95b4278948e",
+ "response_item_id": "fc_f95b4278948e",
+ "type": "function",
+ "function": {
+  "name": "tool_call",
+  "arguments": "{\"calls\": [{\"name\": \"session_search\", \"arguments\": {\"limit\": 5, \"query\": \"ROUND-5 D5 money-safety APPROVE gate closed ledger section\", \"role_filter\": \"assistant\"}}]}"
+ }
+}

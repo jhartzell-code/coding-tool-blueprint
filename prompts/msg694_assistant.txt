@@ -1,0 +1,53 @@
+ROLE: assistant
+CONTENT_LEN: 517
+TOOL_CALLS: 4
+
+===== CONTENT =====
+Both recovery mechanics are now proven: session history stores full tool-call arguments untruncated (message 480's complete patch script came back), and large results spill to `/root/.hermes/cache/spillover/*.txt` where I can read them directly. The reconstruction path is mechanical: **last full read-backs (messages 476–478, post-round-1 state) + replay every round-2/3/4/5 patch script**.
+
+Pulling all four sources in one batch — the doc read-backs via `around_message_id`, plus the patch scripts for rounds 2/3/4:
+
+===== TOOL_CALL 0 =====
+{
+ "id": "chatcmpl-tool-9138bda6beb33701",
+ "call_id": "chatcmpl-tool-9138bda6beb33701",
+ "response_item_id": "fc_chatcmpl-tool-9138bda6beb33701",
+ "type": "function",
+ "function": {
+  "name": "tool_call",
+  "arguments": "{\"calls\": [{\"name\": \"session_search\", \"arguments\": {\"session_id\": \"f9420e998810\", \"around_message_id\": 478}}]}"
+ }
+}
+===== TOOL_CALL 1 =====
+{
+ "id": "call_1dac4e92be51",
+ "call_id": "call_1dac4e92be51",
+ "response_item_id": "fc_1dac4e92be51",
+ "type": "function",
+ "function": {
+  "name": "tool_call",
+  "arguments": "{\"calls\": [{\"name\": \"session_search\", \"arguments\": {\"limit\": 3, \"query\": \"UNKNOWN exit 5 ambiguous create re-query never auto-retry\", \"role_filter\": \"assistant\"}}]}"
+ }
+}
+===== TOOL_CALL 2 =====
+{
+ "id": "call_3e931cd7191c",
+ "call_id": "call_3e931cd7191c",
+ "response_item_id": "fc_3e931cd7191c",
+ "type": "function",
+ "function": {
+  "name": "tool_call",
+  "arguments": "{\"calls\": [{\"name\": \"session_search\", \"arguments\": {\"limit\": 3, \"query\": \"flock locks path held whole run another vastvm up\", \"role_filter\": \"assistant\"}}]}"
+ }
+}
+===== TOOL_CALL 3 =====
+{
+ "id": "call_6fc9d0482ae6",
+ "call_id": "call_6fc9d0482ae6",
+ "response_item_id": "fc_6fc9d0482ae6",
+ "type": "function",
+ "function": {
+  "name": "tool_call",
+  "arguments": "{\"calls\": [{\"name\": \"session_search\", \"arguments\": {\"limit\": 3, \"query\": \"HttpResponse body bytes empty plain-dict headers final URL timeout ValueError\", \"role_filter\": \"assistant\"}}]}"
+ }
+}

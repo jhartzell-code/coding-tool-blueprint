@@ -1,0 +1,18 @@
+ROLE: assistant
+CONTENT_LEN: 348
+TOOL_CALLS: 1
+
+===== CONTENT =====
+Still rejected — the whole session lineage counts as "active context" (the compaction boundary defines it, not the summary). But discover mode with anchor phrases works for those messages. Two discover files are still on disk holding msgs 545–554 and 577–587 (round-3 and round-4 patch eras). Checking whether they contain full tool-call arguments:
+
+===== TOOL_CALL 0 =====
+{
+ "id": "chatcmpl-tool-9918115950378808",
+ "call_id": "chatcmpl-tool-9918115950378808",
+ "response_item_id": "fc_chatcmpl-tool-9918115950378808",
+ "type": "function",
+ "function": {
+  "name": "execute_code",
+  "arguments": "{\"code\": \"import json, os\\nos.makedirs('/root/workspace/recovery', exist_ok=True)\\n\\nfor fn in ['chatcmpl-tool-aa45c53f3826f8df.txt', 'call_3e931cd7191c.txt']:\\n    d = json.load(open(f'/root/.hermes/cache/spillover/{fn}'))\\n    print('='*100)\\n    print(fn, '| mode:', d.get('mode'), '| query:', (d.get('query') or '')[:70])\\n    for r in d.get('results', []):\\n        print(f\\\"  result: match={r.get('match_message_id')} role={r.get('matched_role')} snippet_len={len(r.get('snippet','') or '')}\\\")\\n        # check for full message content vs snippet\\n        for k in r.keys():\\n            if k not in ('snippet',):\\n                v = r[k]\\n                if isinstance(v, str) and len(v) > 200:\\n                    print(f'    field {k}: len={len(v)}')\\n        sn = r.get('snippet') or ''\\n        if len(sn) > 500:\\n            print('    SNIPPET (head 300):', sn[:300].replace(chr(10), ' | '))\\n            print('    SNIPPET (tail 200):', sn[-200:].replace(chr(10), ' | '))\"}"
+ }
+}

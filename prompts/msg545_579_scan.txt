@@ -1,0 +1,19 @@
+msg 545 [assistant] content_len=118 tool_calls=1 =====
+  TC0: tool_call args_len=1093 code_len=0
+===== msg 547 [assistant] content_len=646 tool_calls=1 =====
+  TC0: execute_code args_len=6409 code_len=6146
+    head: import hashlib, json |  | base = '/workspace/vast-coding-vm' | amend, ledger = (f'{base}/docs/{n}' for n in ('PLAN-v2-AMENDMENTS.md', 'REVIEW-LEDGER.md')) |  | def apply(path, old, new): |     t = open(path).read() |     n = t.count(old) | 
+===== msg 549 [user] content_len=4001 tool_calls=0 =====
+===== msg 550 [assistant] content_len=588 tool_calls=1 =====
+  TC0: execute_code args_len=9358 code_len=8925
+    head: import hashlib, json |  | base = '/workspace/vast-coding-vm' | amend = f'{base}/docs/PLAN-v2-AMENDMENTS.md' | contract = f'{base}/docs/CONTRACT.md' | ledger = f'{base}/docs/REVIEW-LEDGER.md' |  | def apply(path, old, new): |     t = open(pa
+===== msg 552 [assistant] content_len=464 tool_calls=1 =====
+  TC0: execute_code args_len=4837 code_len=4674
+    head: import hashlib, json |  | base = '/workspace/vast-coding-vm' | amend, contract, ledger = (f'{base}/docs/{n}' for n in |     ('PLAN-v2-AMENDMENTS.md', 'CONTRACT.md', 'REVIEW-LEDGER.md')) |  | # verification (backtick-aware anchors), read-onl
+===== msg 554 [assistant] content_len=435 tool_calls=1 =====
+  TC0: execute_code args_len=3860 code_len=3722
+    head: import hashlib, json |  | base = '/workspace/vast-coding-vm' | ledger = f'{base}/docs/REVIEW-LEDGER.md' | t = open(ledger).read() | headings = [l for l in t.splitlines() if l.startswith('#')] | print('LEDGER HEADINGS:', json.dumps(headings)
+===== msg 577 [assistant] content_len=564 tool_calls=1 =====
+  TC0: execute_code args_len=7124 code_len=6889
+    head: import hashlib, json |  | base = '/workspace/vast-coding-vm' | contract = open(f'{base}/docs/CONTRACT.md').read() | amend = open(f'{base}/docs/PLAN-v2-AMENDMENTS.md').read() | ledger = f'{base}/docs/REVIEW-LEDGER.md' |  | # ---------- ledge
+===== msg 579 [user] content_len=4001 tool_calls=0 =====

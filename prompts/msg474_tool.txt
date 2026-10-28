@@ -1,0 +1,6 @@
+ROLE: tool
+CONTENT_LEN: 92
+TOOL_CALLS: 0
+
+===== CONTENT =====
+[patch] replace in /workspace/vast-coding-vm/docs/PLAN-v2-AMENDMENTS.md (1,047 chars result)

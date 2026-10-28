@@ -1,0 +1,42 @@
+ROLE: assistant
+CONTENT_LEN: 510
+TOOL_CALLS: 3
+
+===== CONTENT =====
+Major discovery — the errored child `deleg_98e0e051`'s log shows it read all four docs (log-preview elided, but the reads happened), and there's a 40KB spillover file from my own first session_search call that may carry fuller content. But the most reliable recovery source is **assistant tool-call arguments** (write_file originals + patch scripts) which the session DB stores untruncated — message 480 proved that. 
+
+Probing for the latest full doc read-backs across history, and checking the spillover file:
+
+===== TOOL_CALL 0 =====
+{
+ "id": "call_c8eb2800d217",
+ "call_id": "call_c8eb2800d217",
+ "response_item_id": "fc_c8eb2800d217",
+ "type": "function",
+ "function": {
+  "name": "terminal",
+  "arguments": "{\"command\": \"head -c 3000 /root/.hermes/cache/spillover/chatcmpl-tool-aa45c53f3826f8df.txt; echo; echo \\\"=== grep doc markers ===\\\"; grep -c \\\"Modules and ownership\\\" /root/.hermes/cache/spillover/chatcmpl-tool-aa45c53f3826f8df.txt; grep -o \\\"original_content_chars[^,]*\\\" /root/.hermes/cache/spillover/chatcmpl-tool-aa45c53f3826f8df.txt | head; echo \\\"=== all files with sizes ===\\\"; ls -la /root/.hermes/cache/spillover/\", \"timeout\": 60, \"workdir\": \"/root\"}"
+ }
+}
+===== TOOL_CALL 1 =====
+{
+ "id": "call_4395260465ac",
+ "call_id": "call_4395260465ac",
+ "response_item_id": "fc_4395260465ac",
+ "type": "function",
+ "function": {
+  "name": "tool_call",
+  "arguments": "{\"calls\": [{\"name\": \"session_search\", \"arguments\": {\"limit\": 5, \"query\": \"\\\"invalid JSON in response\\\"\", \"role_filter\": \"tool\"}}]}"
+ }
+}
+===== TOOL_CALL 2 =====
+{
+ "id": "call_01569bc00b07",
+ "call_id": "call_01569bc00b07",
+ "response_item_id": "fc_01569bc00b07",
+ "type": "function",
+ "function": {
+  "name": "tool_call",
+  "arguments": "{\"calls\": [{\"name\": \"session_search\", \"arguments\": {\"limit\": 5, \"query\": \"flock OR \\\"label lock\\\" OR \\\"another vastvm up\\\"\", \"role_filter\": \"tool\"}}]}"
+ }
+}

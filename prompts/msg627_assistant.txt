@@ -1,0 +1,18 @@
+ROLE: assistant
+CONTENT_LEN: 152
+TOOL_CALLS: 1
+
+===== CONTENT =====
+The deferred tool needs `tool_call` to invoke. The venv pytest works and the repo skeleton is empty — the docs live in session history. Recovering them:
+
+===== TOOL_CALL 0 =====
+{
+ "id": "chatcmpl-tool-aa45c53f3826f8df",
+ "call_id": "chatcmpl-tool-aa45c53f3826f8df",
+ "response_item_id": "fc_chatcmpl-tool-aa45c53f3826f8df",
+ "type": "function",
+ "function": {
+  "name": "tool_call",
+  "arguments": "{\"calls\": [{\"name\": \"session_search\", \"arguments\": {\"limit\": 5, \"query\": \"vastvm CONTRACT.md modules ownership transport HttpResponse exit code\", \"sort\": \"newest\"}}]}"
+ }
+}

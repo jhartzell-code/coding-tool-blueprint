@@ -1,0 +1,6 @@
+ROLE: tool
+CONTENT_LEN: 80
+TOOL_CALLS: 0
+
+===== CONTENT =====
+[patch] replace in /workspace/vast-coding-vm/docs/CONTRACT.md (991 chars result)

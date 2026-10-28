@@ -1,0 +1,18 @@
+ROLE: assistant
+CONTENT_LEN: 118
+TOOL_CALLS: 1
+
+===== CONTENT =====
+Round-4 payload verified (974 chars, pure ASCII, sha `aa0bb625…`). Dispatching the delta confirmation to DeepSeek now.
+
+===== TOOL_CALL 0 =====
+{
+ "id": "chatcmpl-tool-b68cc00c87baad10",
+ "call_id": "chatcmpl-tool-b68cc00c87baad10",
+ "response_item_id": "fc_chatcmpl-tool-b68cc00c87baad10",
+ "type": "function",
+ "function": {
+  "name": "tool_call",
+  "arguments": "{\"calls\": [{\"arguments\": {\"tasks\": [{\"context\": \"ROUND-4 delta confirmation money safety. Two fixes for your round-3 findings: 1) L3 now maps ANY create-call failure (transport error, timeout, HTTP 5xx, or a 2xx response missing new_contract) onto the ambiguous path: re-query by label; found means treat as created and continue waiting; not found means UNKNOWN, report offer id plus label, advise Vast.ai console or vastvm status check. 2) Exit code 5 added exclusively for the UNKNOWN outcome, distinct from exit 1: exit-1 failures are safe for a wrapper to retry once the guard re-runs, UNKNOWN exits 5 and must never be auto-retried. Contract exit table now reads: 0 ok; 1 API transport config errors; 2 argparse usage; 3 confirmation refused; 4 bad state wait-timeout ssh-unreachable with destroy hint; 5 UNKNOWN ambiguous create, never auto-retry, check console first. Question: are your two round-3 findings resolved? First line VERDICT: APPROVE or VERDICT: REJECT, then numbered findings with severity and evidence.\", \"role\": \"coding-build-deepseek\"}]}, \"name\": \"coding_model_stage\"}]}"
+ }
+}

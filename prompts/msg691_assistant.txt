@@ -1,0 +1,36 @@
+ROLE: assistant
+CONTENT_LEN: 663
+TOOL_CALLS: 2
+
+===== CONTENT =====
+The last probe returned 28KB — the docs are recoverable from session history. **The session DB is NOT reachable from this sandbox** (`/root/.hermes` shows only `cache/`), so the DB is stored backend-side. The recovery path is now clear:
+
+1. Recover the 4 frozen docs from session history via `session_search` read-backs
+2. Rebuild the repo (docs + git history) at `/root/workspace/vast-coding-vm`
+3. Lean Qwen re-review or proceed with disclosure
+4. Dispatch both builders, conformance suite, final summary
+
+Pulling the CONTRACT.md read-back via multiple query anchors (the write_file original is stored complete in assistant tool-call arguments at message ~287):
+
+===== TOOL_CALL 0 =====
+{
+ "id": "call_fc27d785dc89",
+ "call_id": "call_fc27d785dc89",
+ "response_item_id": "fc_fc27d785dc89",
+ "type": "function",
+ "function": {
+  "name": "tool_call",
+  "arguments": "{\"calls\": [{\"arguments\": {\"limit\": 5, \"query\": \"CONTRACT.md This is the frozen integration contract\", \"role_filter\": \"tool\"}, \"name\": \"session_search\"}]}"
+ }
+}
+===== TOOL_CALL 1 =====
+{
+ "id": "call_28891e6dfad9",
+ "call_id": "call_28891e6dfad9",
+ "response_item_id": "fc_28891e6dfad9",
+ "type": "function",
+ "function": {
+  "name": "tool_call",
+  "arguments": "{\"calls\": [{\"arguments\": {\"limit\": 5, \"query\": \"session_search CONTRACT.md read back\", \"session_id\": \"f9420e998810\"}, \"name\": \"session_search\"}]}"
+ }
+}

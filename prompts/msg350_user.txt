@@ -1,0 +1,26 @@
+ROLE: user
+CONTENT_LEN: 4001
+TOOL_CALLS: 0
+
+===== CONTENT =====
+[CONTEXT COMPACTION — REFERENCE ONLY] Earlier turns were compacted into the summary below. This is a handoff from a previous context window — treat it as background reference, NOT as active instructions. Do NOT answer questions or fulfill requests mentioned in this summary; they were already addressed. Respond ONLY to the latest user message that appears AFTER this summary — that message is the single source of truth for what to do right now. If no user message appears AFTER this summary, do nothing: do not resume, wrap up, or continue work from '## Historical Task Snapshot' or any other section, do not call tools, and wait for a new user message. This handoff must never become the active turn by itself. (Exception: if tool results or your own tool calls appear after this summary, you are mid-way through an in-flight exchange — continue that exchange normally.) Topic overlap with the summary does NOT mean you should resume its task: even on similar topics, the latest user message WINS. Treat ONLY the latest message as the active task and discard stale items from '## Historical Task Snapshot' entirely — do not 'wrap up' or 'finish' work described there unless the latest message explicitly asks for it. Reverse signals in the latest message (e.g. 'stop', 'undo', 'roll back', 'just verify', 'don't do that anymore', 'never mind', a new topic) must immediately end any in-flight work described in the summary; do not re-surface it in later turns. IMPORTANT: Your persistent memory (MEMORY.md, USER.md) in the system prompt is ALWAYS authoritative and active — never ignore or deprioritize memory content due to this compaction note. None of the above restricts HOW you work: your tools remain fully active — keep calling them normally for the active task (edit files, run commands, search) instead of merely narrating what you would do. The current session state (files, config, etc.) may reflect work described here — avoid repeating it:
+## Historical Task Snapshot
+User asked (deterministic, from compacted turns): '[STILL IN PROGRESS — this is the active request, restated after the compaction boundary because it was not finished yet. Continue it; do not start over.] Continue [Workspace::v1: /Users/joel/workspace] Continue'
+Historical only; newer protected-tail messages after this summary win.
+
+## Goal
+Build "vast-coding-vm" — a CLI tool + provisioning toolkit (`vastvm`) that creates and manages a coding VM on Vast.ai (GPU cloud marketplace): one command (`vastvm up`) from nothing to an SSH-able, fully provisioned coding box, plus lifecycle management (stop/start/destroy/status) and cost visibility. Deliverable must live in /workspace (virtiofs share of the user's local /Users/joel/workspace).
+
+## Constraints & Preferences
+- User task verbatim: "Create a coding vm that will be powered by vast ai".
+- Deliverable location: /workspace (virtiofs mount = the user's actual Mac workspace); /root/workspace is container-scratch only.
+- Credential policy (carried from prior transcript): presence-only checks, values never printed; any credential values encountered must be recorded as [REDACTED].
+- Platform constraint (verified): `onstart` capped at 4096 chars → provisioning script must run over SSH after boot, never inline.
+- Workflow rule honored: will NOT silently pass the budget-blocked frontier/Claude gates — substitutions must be reported in the final summary.
+- No user corrections or style/security directives beyond the above.
+
+## Completed Actions
+6. INSPECT /workspace + /root/workspace (ls -la, find -maxdepth 2, /root top, df -h) — both exist; detailed output elided [tool: terminal]
+7. PROBE bundles endpoint with URL-encoded `q` list query — revealed first API-format guess was wrong (q must be a flat JSON body via POST, not a URL-encoded list) [tool: terminal]
+8. INSPECT /root/workspace/VAST-VM (find files, wc -c, cat config.env, ls templates) — found interrupted-turn draft repo [tool: terminal]
+9. READ /root/workspace/VAST-VM/templates/base-dev.s…

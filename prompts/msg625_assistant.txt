@@ -1,0 +1,18 @@
+ROLE: assistant
+CONTENT_LEN: 336
+TOOL_CALLS: 1
+
+===== CONTENT =====
+All recovery sources confirmed: the venv has pytest 9.1.1 (usable), the repo skeleton is empty, and the docs must be recovered from session history (the summary confirms full read-backs are preserved there). The session DB stores full messages — the elision in this conversation is display-level only. Searching for the frozen docs now:
+
+===== TOOL_CALL 0 =====
+{
+ "id": "chatcmpl-tool-a215c4d5e3770723",
+ "call_id": "chatcmpl-tool-a215c4d5e3770723",
+ "response_item_id": "fc_chatcmpl-tool-a215c4d5e3770723",
+ "type": "function",
+ "function": {
+  "name": "session_search",
+  "arguments": "{\"limit\": \"5\", \"query\": \"vastvm CONTRACT.md modules ownership transport HttpResponse exit code\", \"sort\": \"newest\"}"
+ }
+}

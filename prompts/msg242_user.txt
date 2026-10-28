@@ -1,0 +1,6 @@
+ROLE: user
+CONTENT_LEN: 50
+TOOL_CALLS: 0
+
+===== CONTENT =====
+Create a coding vm that will be powered by vast ai

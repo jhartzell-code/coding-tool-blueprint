@@ -1,0 +1,73 @@
+ROLE: assistant
+CONTENT_LEN: 298
+TOOL_CALLS: 6
+
+===== CONTENT =====
+Now I'll fold the re-review fixes into the frozen docs themselves — small consistency patches first (interactive-ssh must not force `BatchMode` so key passphrases still work; exit code 4 needs to cover ssh-unreachable-after-retries; two edge behaviors in `run_ssh`/`create_instance` need freezing):
+
+===== TOOL_CALL 0 =====
+{
+ "id": "call_7e5c23458cf5",
+ "call_id": "call_7e5c23458cf5",
+ "response_item_id": "fc_7e5c23458cf5",
+ "type": "function",
+ "function": {
+  "name": "patch",
+  "arguments": "{\"new_string\": \"def ssh_argv(host: str, port: int, *, user: str,\\n             extra: list[str] | None = None,\\n             batch: bool = True) -> list[str]\\n    # [\\\"ssh\\\", \\\"-p\\\", str(port), \\\"-o\\\", \\\"StrictHostKeyChecking=accept-new\\\",\\n    #  \\\"-o\\\", \\\"ConnectTimeout=15\\\", *([\\\"-o\\\", \\\"BatchMode=yes\\\"] if batch else []),\\n    #  f\\\"{user}@{host}\\\", *extra]\\n    # batch=False ONLY for the interactive `vastvm ssh` passthrough (it must\\n    # allow key passphrases); every scripted or non-interactive use passes\\n    # batch=True so ssh fails fast instead of prompting.\", \"old_string\": \"def ssh_argv(host: str, port: int, *, user: str,\\n             extra: list[str] | None = None) -> list[str]\\n    # [\\\"ssh\\\", \\\"-p\\\", str(port), \\\"-o\\\", \\\"BatchMode=yes\\\",\\n    #  \\\"-o\\\", \\\"StrictHostKeyChecking=accept-new\\\", \\\"-o\\\", \\\"ConnectTimeout=15\\\",\\n    #  f\\\"{user}@{host}\\\", *extra]\", \"path\": \"/workspace/vast-coding-vm/docs/CONTRACT.md\"}"
+ }
+}
+===== TOOL_CALL 1 =====
+{
+ "id": "call_502e3ef998f3",
+ "call_id": "call_502e3ef998f3",
+ "response_item_id": "fc_502e3ef998f3",
+ "type": "function",
+ "function": {
+  "name": "patch",
+  "arguments": "{\"new_string\": \"def run_ssh(argv: list[str], *, input: bytes | None = None,\\n            timeout_s: float = 1800.0) -> subprocess.CompletedProcess\\n    # subprocess.run(argv, input=..., timeout=timeout_s, capture_output=True)\\n    # so ssh_retry can inspect stderr; subprocess.TimeoutExpired propagates \u2014\\n    # callers such as provision.py catch it and report a provision timeout.\", \"old_string\": \"def run_ssh(argv: list[str], *, input: bytes | None = None,\\n            timeout_s: float = 1800.0) -> subprocess.CompletedProcess\", \"path\": \"/workspace/vast-coding-vm/docs/CONTRACT.md\"}"
+ }
+}
+===== TOOL_CALL 2 =====
+{
+ "id": "call_c34d548c9f82",
+ "call_id": "call_c34d548c9f82",
+ "response_item_id": "fc_c34d548c9f82",
+ "type": "function",
+ "function": {
+  "name": "patch",
+  "arguments": "{\"new_string\": \"`create_instance` sends `{\\\"image\\\", \\\"disk\\\", \\\"label\\\", \\\"runtype\\\": \\\"ssh_direct\\\",\\n\\\"onstart\\\" (<= 4096 chars), \\\"cancel_unavail\\\": true, \\\"env\\\"}` with Bearer auth.\\nA 2xx create response that lacks `new_contract` raises\\n`VastApiError(200, \\\"missing new_contract\\\")`.\", \"old_string\": \"`create_instance` sends `{\\\"image\\\", \\\"disk\\\", \\\"label\\\", \\\"runtype\\\": \\\"ssh_direct\\\",\\n\\\"onstart\\\" (<= 4096 chars), \\\"cancel_unavail\\\": true, \\\"env\\\"}` with Bearer auth.\", \"path\": \"/workspace/vast-coding-vm/docs/CONTRACT.md\"}"
+ }
+}
+===== TOOL_CALL 3 =====
+{
+ "id": "call_bda1853ff70c",
+ "call_id": "call_bda1853ff70c",
+ "response_item_id": "fc_bda1853ff70c",
+ "type": "function",
+ "function": {
+  "name": "patch",
+  "arguments": "{\"new_string\": \"- Exit codes: 0 ok; 1 `VastApiError` / `TransportError` / `ConfigError`\\n  (message to stderr); 2 argparse usage; 3 confirmation refused; 4 bad\\n  instance state, wait-timeout, or ssh unreachable after retries \u2014 whenever\\n  a live instance exists the message includes the instance id and the exact\\n  `vastvm destroy <id> --yes` command.\", \"old_string\": \"- Exit codes: 0 ok; 1 `VastApiError` / `TransportError` / `ConfigError`\\n  (message to stderr); 2 argparse usage; 3 confirmation refused; 4 bad\\n  instance state or wait-timeout with a live instance (message then includes\\n  the instance id and the exact `vastvm destroy <id> --yes` command).\", \"path\": \"/workspace/vast-coding-vm/docs/CONTRACT.md\"}"
+ }
+}
+===== TOOL_CALL 4 =====
+{
+ "id": "call_41922b951fe7",
+ "call_id": "call_41922b951fe7",
+ "response_item_id": "fc_41922b951fe7",
+ "type": "function",
+ "function": {
+  "name": "patch",
+  "arguments": "{\"new_string\": \"  never retried. Final failure prints instance id + destroy hint and exits 4\\n  (the instance may still be billing).\", \"old_string\": \"  never retried. Final failure prints instance id + destroy hint (the\\n  instance may still be billing).\", \"path\": \"/workspace/vast-coding-vm/docs/PLAN-v2-AMENDMENTS.md\"}"
+ }
+}
+===== TOOL_CALL 5 =====
+{
+ "id": "call_ca9c5b71c8f2",
+ "call_id": "call_ca9c5b71c8f2",
+ "response_item_id": "fc_ca9c5b71c8f2",
+ "type": "function",
+ "function": {
+  "name": "patch",
+  "arguments": "{\"new_string\": \"0 ok | 1 api/transport/config error | 2 usage | 3 confirmation refused |\\n4 bad instance state OR wait-timeout OR ssh unreachable after retries,\\nwhenever a live instance exists (message includes the instance id +\\ndestroy command whenever an instance exists).\", \"old_string\": \"0 ok | 1 api/transport/config error | 2 usage | 3 confirmation refused |\\n4 bad instance state OR wait-timeout with a live instance (message includes\\nthe instance id + destroy command whenever an instance exists).\", \"path\": \"/workspace/vast-coding-vm/docs/PLAN-v2-AMENDMENTS.md\"}"
+ }
+}

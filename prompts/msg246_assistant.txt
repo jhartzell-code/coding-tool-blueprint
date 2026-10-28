@@ -1,0 +1,18 @@
+ROLE: assistant
+CONTENT_LEN: 227
+TOOL_CALLS: 1
+
+===== CONTENT =====
+I understand. You want to build infrastructure for a **coding VM on Vast.ai** - a cloud-based virtual machine service where developers can rent GPUs for AI/ML development. Let me check your current workspace and build this out.
+
+===== TOOL_CALL 0 =====
+{
+ "id": "call_00d2j0ob",
+ "call_id": "call_00d2j0ob",
+ "response_item_id": "fc_00d2j0ob",
+ "type": "function",
+ "function": {
+  "name": "search_files",
+  "arguments": "{\"limit\":30,\"path\":\"/Users/joel/workspace\",\"target\":\"files\"}"
+ }
+}
